@@ -3,5 +3,38 @@
 
 \chapter{Preventing unauthorized access}
 
+\section{Introduction}
+\subsection{Access control in web applications}
+\begin{itemize}
+\item Authentication is only the first step
+\item Authentication in web applications is one of these topics with a long history. Everybody has their idea of how to do it, and most of these ideas are antiquated.
+\item Also storing credentials is harder then you would think.
+\item Using multi-factor authentication also provides several benefits.
+\item Many applications keep track of the user's authenticated state in a session object. Sadly most of them fail to get the details of secure session management right.
+\item On the one hand, the application needs to enforce proper permissions on access to data or operations. But on the other hand, the application also needs to ensure that actions carried out in the user's name are intentional.
+\end{itemize}
+
+\subsection{Introducing state into your application}
+\begin{itemize}
+\item HTTP is a stateless protocol $\rightarrow$ authentication and authorization are challenging.
+\item \textbf{HTTP Basic Authentication}
+\begin{enumerate}
+\item Server tells browers that a resource is off limits.
+\item Browser will prompt the user to authenticate.
+\item With the user's credentials, the browser again tries to fetch the resource. The credentials are present in the Authorization header.
+\item The server can now verify the credentials and decide if the user can access the resource. If the answer is affirmative, the response has \textbf{status code 200} and contains the resource. Otherwise, the server can send an error message with \textbf{status code 403}.
+\end{enumerate}
+\item Note that the Authorization header does not contain the cleartext credentials. The browser has \textbf{base64-encoded} them to ensure they can be safely used in an HTTP message $\rightarrow$ can easily be undone, not for security reasons. Because it is sent as part of the request, and passwords can contain any kind of characters. Some of these characters could confuse the server parsing the headers, resulting in vulnerabilities.
+\item Drawbacks:
+\begin{enumerate}
+\item it provides only the identity of the user $\rightarrow$ no support to track additional properties
+\item The username and password are present in every request $\rightarrow$ All an eavesdropper needs to impersonate the user is to capture one request.
+\item Once entered by the user, the browser keeps using the credentials for that website. The only effective way for the user to log out is to close the browser.
+\item The browser handles authentication in a popup window. As a consequence, the authentication form cannot be integrated into the application's UI.
+\end{enumerate}
+\item Today, most applications use a custom authentication form, in combination with session management.
+\item Session management ensures the propagation of authentication information.
+\item Unfortunately, this complex configuration is prone to mistakes and misconfigurations. Many applications suffer from broken authentication and session management. These issues are quite severe, as they result in unauthorized access to the application. The OWASP top 10 even ranks them in second place.
+\end{itemize}
 
 \end{document}
