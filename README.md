@@ -26,7 +26,7 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
   - [x] Advanced topics
   - [x] Putting things into context
 * Preventing unauthorized access 
-  - [ ] ==Introduction== &larr;
+  - [ ] &rarr; **Introduction** &larr;
   - [ ] Secure authentication
   - [ ] Challenges to session management
   - [ ] Getting authorization right
