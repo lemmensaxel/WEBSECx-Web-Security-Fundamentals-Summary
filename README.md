@@ -9,58 +9,38 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
 
 
 
-Progress so far:
+**Progress so far:**
 
-Is security an illusion?
+* Is security an illusion?
+  - [x] Getting started with edX
+  - [x] Introduction
+  - [x] The web security landscape
+  - [x] The security model of the web
+  - [x] The lab environment
+  - [x] Putting things into context
+* Securing the communication channel
+  - [x] Introduction
+  - [x] Underpinnings of HTTPS
+  - [x] Deploying HTTPS
+  - [x] HTTPS in your application
+  - [x] Advanced topics
+  - [x] Putting things into context
+* Preventing unauthorized access 
+  - [ ] ==Introduction== &larr;
+  - [ ] Secure authentication
+  - [ ] Challenges to session management
+  - [ ] Getting authorization right
+  - [ ] Putting things into context
 
-Getting started with edX
 
-Introduction
-
-The web security landscape
-The security model of the web
-The lab environment
-Putting things into context
-Securing the communication channel
-
-Introduction
-This is your last visited course section.Resume Course 
-Underpinnings of HTTPS
-Intermediate Test This content is graded
-Deploying HTTPS
-Intermediate Test This content is graded
-HTTPS in your application
-Intermediate Test This content is graded
-Advanced topics
-Intermediate Test This content is graded
-Putting things into context
-Overview Test This content is graded
-Preventing unauthorized access
-
-Introduction
-Secure authentication
-Intermediate Test This content is graded
-Challenges to session management
-Intermediate Test This content is graded
-Getting authorization right
-Intermediate Test This content is graded
-Putting things into context
-Overview Test This content is graded
-Securely handling untrusted data
-
-Introduction
-Server-side injection attacks
-Intermediate Test This content is graded
-Client-side injection attacks
-Intermediate Test This content is graded
-Advanced client-side attacks and defenses
-Intermediate Test This content is graded
-Putting things into context
-Overview Test This content is graded
-Conclusion
-
-Overview of this course
-Overview of best practices
-Final exam
-Final Exam This content is graded
-Towards secure web applications
+* Securely handling untrusted data
+  - [ ] Introduction
+  - [ ] Server-side injection attacks
+  - [ ] Client-side injection attacks
+  - [ ] Advanced client-side attacks and defenses
+  - [ ] Putting things into context
+* Conclusion
+  - [ ] Overview of this course
+  - [ ] Overview of best practices
+  - [ ] Final exam
+  - [ ] Towards secure web applications
