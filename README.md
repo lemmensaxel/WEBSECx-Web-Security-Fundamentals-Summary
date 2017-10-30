@@ -1,5 +1,5 @@
 # WEBSECx: Web Security Fundamentals: Summary
-This repository provides a summary of the [**Web Security Fundamentals **](https://mooc.websec.be/) MOOC by **Philippe De Ryck**.
+This repository provides a summary of the [Web Security Fundamentals](https://mooc.websec.be/) MOOC by **Philippe De Ryck**.
 
 As of 2017-2018, this MOOC is a mandatory part of the Development of Secure Software course at KULeuven. I initially started this document to centralise all information and to be able to quickly review the material before the exam. It is a compilation of (rewritten) transcripts of the video lectures and some extra information. Due to multiple demands, I created a github repository to easily share this with fellow students.
 
