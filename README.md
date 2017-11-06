@@ -27,14 +27,14 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
   - [x] Putting things into context
 * Preventing unauthorized access 
   - [x] Introduction
-  - [x]  Secure authentication 
-  - [ ] &rarr; **Challenges to session management** &larr;
-  - [ ] Getting authorization right
-  - [ ] Putting things into context
+  - [x] Secure authentication 
+  - [x]  Challenges to session management
+  - [x] Getting authorization right
+  - [x] Putting things into context
 
 
 * Securely handling untrusted data
-  - [ ] Introduction
+  - [ ] &rarr; **Introduction** &larr;
   - [ ] Server-side injection attacks
   - [ ] Client-side injection attacks
   - [ ] Advanced client-side attacks and defenses

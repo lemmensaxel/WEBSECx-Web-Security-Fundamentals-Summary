@@ -38,7 +38,7 @@
 \end{itemize}
 
 \section{Secure authentication}
-\subsubsection{The truth about passwords}
+\subsection{The truth about passwords}
 \begin{itemize}
 \item More and more voices are proclaiming passwords as insecure, inefficient or even outright evil. They advocate the use of alternative authentication mechanisms, such as hardware tokens or mobile applications. $\rightarrow$ but complicated and disruptive.
 \item Almost every application today still uses passwords.
@@ -61,7 +61,7 @@
 \item If you don't want to use a password manager, you can take some countermeasures as well (e.g. divide accounts into trust levels, and use a different password for each of these levels).
 \end{itemize}
 
-\subsubsection{Insecure password storage}
+\subsection{Insecure password storage}
 \begin{itemize}
 \item One of these weak behaviour patterns is reusing passwords across many applications.
 \item It is best to adhere to a defense-in-depth strategy to minimize the impact of a data breach $\rightarrow$ Store your passwords securely!
@@ -73,7 +73,7 @@
 \end{enumerate}
 \end{itemize}
 
-\subsubsection{Secure password storage}
+\subsection{Secure password storage}
 \begin{itemize}
 \item To prevent brute force attacks, you should use a dedicated password hashing function. These are cryptographic functions that perform a certain amount of iterations to calculate the output. As a result, they are expensive to execute, and withstand brute force attacks by design. In practice, all recommended password hashing functions also use a salt to ensure that even if two users pick the same password, the hash will be different.
 \item Popular dedicated password hashing functions: \textbf{bcrypt, argon2, PBKDF2, scrypt...}
@@ -96,7 +96,7 @@
 \end{enumerate}
 \end{itemize}
 
-\subsubsection{Preventing enumeration attacks}
+\subsection{Preventing enumeration attacks}
 \begin{itemize}
 \item In a \textbf{brute force attack}, the attacker tries to guess the password of a valid user of the application $\rightarrow$ can be very effective!
 \item With an \textbf{enumeration attack}, the attacker can determine if a username exists in the application. If the application leaks such information, it can be abused to compile a list of valid usernames. That list, in turn, enables the attacker to optimize his brute force attack.
@@ -116,7 +116,7 @@
 \end{enumerate}
 \end{itemize}
 
-\subsubsection{Beyond password-based authentication}
+\subsection{Beyond password-based authentication}
 \begin{itemize}
 \item Passwords are a weak form of authentication $\rightarrow$ other means of authentication exist as well (possession of a physical device, biometrics, behavior and context...).
 \item \textbf{Multi-factor authentication}: Using an alternative authentication method in combination with a knowledge-based authentication.
@@ -151,4 +151,116 @@
 \item Implementing this in practice poses many challenges, and lots of insecure implementations exist!
 \end{itemize}
 
+\section{Challenges to session management}
+\subsection{Server-side session management}
+\begin{itemize}
+\item Server-side session management is the de facto standard.
+\item This traditional way of keeping state in a web application depends on storing information in a session object on the server. Each session object has a unique identifier (\textbf{session identifier}, or \textbf{SID}), which is shared with the client. When the browser includes this identifier in every request, the server can tie multiple requests together in a session.
+\item Several strategies for including the session identifier in every request.
+\item The most common strategy is to store the session identifier in a cookie. The browser automatically attaches the cookie on every request. The use of cookies results in a robust session management mechanism.
+\item An alternative strategy is to include the identifier in every URL in every page. While this approach works in practice, it is less recommended. Reasons are a higher level of complexity, and a higher risk of leaking the session identifier to third parties.
+\item \emph{Traditional cookie-based session management mechanism:}
+\begin{enumerate}
+\item When the user first opens the application, there is no session.
+\item So when the server receives the first request, it generates a new session object (with an assigned session identifier).
+\item The server sends this session identifier back to the browser. From now on, every request from the browser to the server will include this identifier.
+\item The server uses this identifier to look up the right session object and access its data.
+\end{enumerate}
+\item \emph{How is the session identifier stored in the cookie?}
+\begin{enumerate}
+\item The server sets the session cookie by sending the Set-Cookie response header. The header contains the name of the cookie, and the session identifier. There is no predefined name for a cookie containing a session identifier. Commonly used names are \textbf{SESSIONID}, \textbf{PHPSESSIONID}, \textbf{JSESSIONID} and so forth.
+\item The same cookie name and value will be present in the Cookie header, which the browser attaches to outgoing requests to the same domain.
+\end{enumerate}
+\item The security of this session management mechanism depends on the secrecy of the session identifier. If an attacker obtains the user's session identifier, he can take control of the session.
+\item Two common weaknesses that can result in the disclosure of the session identifier:
+\begin{enumerate}
+\item A first weakness follows from the insecure generation of a new session identifier. If a session identifier is predictable in some way, an attacker can calculate past and future identifiers. This attack is known as brute-forcing the session identifier. Applications that use a custom algorithm to generate session identifiers are often vulnerable to this attack. The proper way to generate session identifiers is to use a secure random number generator.
+\item A second weakness is the insecure transmission or storage of the session identifier. Sending the session identifier in clear text over the network allows interception by an eavesdropper.
+\item (Another potential attack vector is cross-site scripting.)
+\end{enumerate}
+\end{itemize}
+
+\subsection{Securing session cookies}
+\begin{itemize}
+\item One attack vector for a session hijacking attack is eavesdropping on the network. If the application uses HTTP, it exposes the session cookie on the network $\rightarrow$ more common than you may think due to partial HTTPS deployments.
+\item Just deploy the whole application over HTTPS! $\rightarrow$ the cookie with the session identifier is only sent over the secure channel. But remember, HTTP traffic can be observed and manipulated by the attacker. So when the user opens any other web page over HTTP, the attacker can alter the response. Here, he inserts an image tag to trigger an HTTP request to our application. The browser sends a request to load the image our application. This request will contain the cookies. Even though our application responds with a redirect to HTTPS, it’s already too late.\\
+\emph{Fix:} The server can mark the session cookie as \textbf{secure}, which tells the browser that it should only be sent over HTTPS. In practice, the server can mark a cookie as secure by attaching the \textbf{Secure flag} to the Set-Cookie header.
+\item \emph{Note:} If the application is using HTTPS in combination with a Strict Transport Security policy, this attack would also not have been possible. Even if the attacker instructs the browser to make an HTTP request, the Strict Transport Security policy will cause the request to be sent over HTTPS anyway.
+\item There is a second common attack vector: stealing the cookie from JavaScript. When the attacker can control a piece of JavaScript running on a page of the application (exploiting a \textbf{Cross-Site Scripting flaw}), he can abuse this to access the cookies.\\
+\emph{Fix:} The server can set another cookie flag, the \textbf{HttpOnly flag}. This flag marks a cookie as valid for network requests, but not for script-based access. So a session cookie set with the HttpOnly flag is attached to HTTP and HTTPS requests, but is not returned when accessing the \texttt{document.cookie} property. Session cookies should always be set with the HttpOnly flag enabled. In fact, it is a good idea to set the HttpOnly flag on all cookies that do not need to be accessed from JavaScript.
+\end{itemize}
+
+\subsection{Alternative session management mechanisms}
+\begin{itemize}
+\item Think about what would happen when an application is replicated on many servers. The first request goes to a particular server, and that server creates a session object and returns a session identifier. But what happens with the second request? That request now contains an identifier that points to a session object generated by the first server. Several strategies to tackle this problem exist.
+\begin{enumerate}
+\item One example is the use of \textbf{sticky sessions}, where all requests within a session go to the same server.
+\item Another example is \textbf{sharing session state} between servers.
+\item Many modern applications are moving from server-side session management to \textbf{client-side session management}. Session state is stored on the client instead of the server. This way, the server no longer needs to keep track of session data. This fits well within the recent move towards stateless API-based systems.
+\begin{itemize}
+\item When the user first opens the application, there is no session.
+\item When the server receives the first request, it generates a new session object and sends this entire session object back to the browser.
+\item From now on, every request from the browser to the server will include this session object.
+\item The server can directly use the provided session object to access the data.
+\item The information stored in the session object is crucial for making authorization decisions throughout the application.
+\end{itemize}
+\end{enumerate}
+\item \emph{What are the security implications of client-side session management?}
+\begin{enumerate}
+\item The session object stored on the server is considered trusted data. With a session object stored on the client, that assumption no longer holds. The attacker can now change a session object before sending it to the application. The server should check the integrity of the session object, before using any of its data. This integrity check is often implemented by adding a server-generated signature to the session object.
+\item With server-side sessions, it is straightforward to consult a list of active sessions or to revoke a specific session. With client-side sessions, this is a lot harder, or even impossible. There is no easy way to list active sessions, because these sessions are only seen when the client makes a request.
+\item Revoking a specific session is also a hard problem, that is still being debated by experts in the field.
+\item Many applications moved away from using cookies, and use custom headers to transport the session object. While this avoids some of the security challenges with cookies, it also complicates matters for the developer. Cookies are handled automatically by the browser, while custom headers are not. So with custom headers, the developer needs to retrieve the session object from the server, store it somewhere, and attach it to outgoing requests. The choices made to implement these operations have certain ramifications for security.
+\end{enumerate}
+\end{itemize}
+
+\section{Getting authorization right}
+\subsection{Authorization throughout your application}
+Tips by Marten Decat to secure your application.
+\begin{itemize}
+\item Never trust the client.
+\item Don't do any access control on the client.
+\item Only use trusted data, server-side trusted data.
+\item Have correct session management.
+\item Have proper HTTPS transport security.
+\item Many of the major frameworks these days give you primitives and support to do access control right. Don't start building it from scratch and reuse everything that is given to you.
+\item Access control in general these days is often referred to as "triple A": \textbf{Authentication Authorization and Audit}.
+\begin{itemize}
+\item Authorization is sometimes called \textbf{a priori access control}. It's when a user makes a request to an application before actually executing the action you check by the access control rules that hold whether this user should be permitted to do this action, and if not you just don't do it.
+\item Audit is called \textbf{a posteriori access control}. So it's where you always allow the action to proceed, but you log it and afterwards you check all the actions that the authenticated users have performed and you roll back the ones that shouldn't have been permitted, and of course punish the users that have done something that they shouldn't have been allowed to. Essentially, you can you can use audit as a form of access control mechanism. This kind of access control also works in emergency scenarios where somebody actually needs access to a piece of data (\textbf{breaking the glass-procedures}).
+\end{itemize} 
+\end{itemize}
+
+\subsection{Intentional and unintentional requests}
+\begin{itemize}
+\item \textbf{Cross-Site Request Forgery attack (CSRF)}:
+\begin{itemize}
+\item To launch a CSRF attack, the attacker tricks the user into visiting an unrelated web page. Inside this page, the attacker has hidden a piece of malicious code to carry out the attack.
+\item When processed by the browser, the CSRF code will send a request to our application. The request instructs the application to make a new post.
+\item Since the request is going to our domain, the browser will attach the session cookie.
+\item When our application processes the incoming request, it verifies the session information. In this session, the user is authenticated, so the note will be posted in the user’s name.
+\end{itemize}
+\item A CSRF attack takes advantage of the way the browser handles cookies. The browser automatically attaches cookies to outgoing requests, regardless of the context they originated from.
+\item From a server’s point of view, a request created by a CSRF attack is identical to a legitimate request. There is no way for the server to distinguish between intentional requests and unintentional requests.
+\item The traditional defense against CSRF attacks is to add a hidden CSRF token to a form. When the application creates a page that contains a form, it should also generate a user-specific CSRF token. The token is stored in the user’s session, and embedded into the form as a hidden token. When the user fills out the form and submits it, the token will be part of the submitted data. The server can now match the token to the one stored in the user’s session.
+\item \emph{Note:} the attacker is still able to submit a form to create a tasting note from the user’s browser, but the only way for the attacker to obtain the user-specific token of the victim, is to extract it from a page within the victim’s browser. Reading a page from a different origin is explicitly denied by the Same-Origin Policy.
+\item CSRF is possible because of the browser's cookie handling. Unfortunately, the decision to enable this kind of behavior was made almost twenty years ago. Changing the default behavior today would break a large number of applications.
+\item The new \textbf{SameSite cookie flag} indicates that a cookie should only be present on requests within one site. To determine if a request falls within one site, the browser uses the registered domain.
+\item It supports a strict and a lax mode of operation. \textbf{Strict mode} is the one we discussed until now. The \textbf{Lax mode} is a bit less restrictive. It allows the cookie to be present on top-level navigations through a GET request. For example, if a user opens our application by clicking on a link in a search engine,
+the cookie would be present. This benefits usability, while still limiting the exposure to CSRF attacks.
+\end{itemize}
+
+\subsection{Direct access to objects}
+\begin{itemize}
+\item \emph{What are direct object references, and what makes them insecure?}
+\begin{itemize}
+\item In our application, we use direct object references to refer to private posts. Upon creation, every note is assigned a numerical identifier in the database.
+\item  The identifier is part of the URL to display a particular post.
+\item The identifier of a specific post is 42. This makes it very likely that identifiers 1 to 41 exist as well.
+\item The attacker can use these identifiers to retrieve private posts of other users through the URL.
+\end{itemize}
+\item They rank fourth in the OWASP top 10, and they do occur in real life systems.
+\item The most obvious solution to this problem is to put proper authorization checks in place.
+\item In some scenarios, a second mitigation strategy also works well. Instead of exposing direct object references to the client, you can use indirect object references. The server has a map that relates these indirect object references to their direct counterparts (e.g. Fetch all user's posts in array and use array indices as indirect object references). By design, an attacker can only gain access to posts that are already in the list and are accessible anyway.
+\end{itemize}
 \end{document}
