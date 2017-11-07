@@ -1,0 +1,66 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Securely handling untrusted data}
+
+\section{Introduction}
+\subsection{The problem with untrusted data}
+\begin{itemize}
+\item User-provided data is not the only kind of untrusted data. If you think this through, all dynamic data in a web application is untrusted in one way or another. Especially in the modern web, where many applications access the same underlying data stores.
+\item In theory, handling untrusted data is not a hard problem. However in practice, things are a lot more complicated, and mistakes are easy to make.
+\end{itemize}
+
+\subsection{The root cause of injection attacks}
+\begin{itemize}
+\item \textbf{SQL injection} attacks are quite powerful: the provided input can change the structure of the SQL statement being executed. It can contain a query, and an instruction to delete the database.
+\item The real problem is that the database server lacks context information. The database server does not know which part of the statement is data and which part is code.
+\item Other injection vulnerabilities share the same root cause (e.g. \textbf{command injection}, \textbf{code injection}, \textbf{LDAP injection}, \textbf{XPath injection}).
+\end{itemize}
+
+\subsection{A decade of mitigating injection vulnerabilities}
+\begin{itemize}
+\item Recommend for developers to be involved. Make sure that the tools that they give you, the means that they give you to write secure code are actually the things that you want to use on a day to day basis. 
+\end{itemize}
+
+\section{Server-side injection attacks }
+\subsection{Command injection vulnerabilities}
+\begin{itemize}
+\item In essence, a potential \textbf{command injection} vulnerability exists every time untrusted data ends up in an external command. A common source of untrusted data is user input. However, alternative sources, such as cookies or HTTP headers are also potential attack vectors.
+\item Whenever a command is constructed using untrusted data, you need to implement additional defences against command injection attacks.
+\end{itemize}
+
+\subsection{Preventing command injection}
+\begin{itemize}
+\item Injection vulnerabilities follow from a lack of context at execution time
+\item A first line of defence is strict \texbf{input validation}. It is easy to make the checks too restrictive, which breaks the application. But if the check is too permissive, the vulnerability remains.
+\item Most programming languages offer functions to \textbf{escape dangerous shell characters}. This way the dangerous characters are encoded, and the shell is no longer confused between data and code.
+\item Some languages offer a safe API to make system calls. Such an API accepts the command and its arguments as separate parameters. Separating the command and the data ensures that there can be no confusion between data and code.
+\item Java offers protection against command injection attacks out of the box. But improper use of the \texttt{exec} method in Java, and its counterpart in .NET, can still cause injection vulnerabilities.
+\end{itemize}
+
+\subsection{SQL injection}
+\begin{itemize}
+\item A \textbf{SQL injection attack} allows the attacker to modify the SQL code that is executed by the database server.
+\item SQL injection is one of the most dangerous problems in web applications. Both the consequences and prevalence of SQL injection vulnerabilities contribute to this status.
+\item Injection vulnerabilities rank first in the OWASP top 10.
+\item A common way to attack a select query is by injecting a \texbf{UNION statement}. The UNION statement tells the database server to execute both queries and combine the data into one dataset. This type of attack is well-suited to steal data from the database.
+\item Another versatile attack is the insertion of a \textbf{boolean clause}. For example, many queries filter the results in the WHERE clause. By appending a boolean clause that is always true, the attacker can disable filtering. Consequences are the leaking of information, but also bypassing authorization checks.
+\item Another way to modify the structure of the query is by injecting the comment symbol. When the database server encounters a comment symbol, everything after that is ignored. If the attacker injects the comment symbol, he can eliminate the trailing part of a query. The consequences can be severe since additional constraints are often put at the end of a query.
+\item Tools like \textbf{sqlmap} collect a variety of potential attacks. They even support scanning applications for potential SQL vulnerabilities. These results from sqlmap paint a more complete picture on the complexity of SQL injection attacks.
+\end{itemize}
+
+\subsection{Preventing SQL injection}
+\begin{itemize}
+\item SQL injection vulnerabilities have a similar cause as command injection vulnerabilities.
+\item A solid first line of defense is \textb{finput validation}.
+\item Remember that input validation alone is not enough.
+\item Use \textbf{prepared statements with variable binding} $\rightarrow$ provide the proper context information.
+\item Unfortunately, variable binding does not work in all parts of a SQL statement. The names of tables and columns need to be specified up front, and cannot be bound later. But there are safe ways to handle untrusted data in these locations.
+\item One way is to use the untrusted input to select a value from a whitelisted set of values. The explicit selection of a value ensures that untrusted data never ends up in the statement.
+\item Also the encoding of special characters renders the untrusted data harmless. Note that encoding untrusted data for use in a SQL statement is complicated to get right. Every database has a particular set of special characters. Therefore, encoding should only be used as a last resort.
+\item Finally, keep in mind that untrusted data can come from anywhere. User input is only the most obvious candidate. Other examples are cookies or HTTP headers.
+\end{itemize}
+
+\section{Client-side injection attacks}
+
+\end{document}
