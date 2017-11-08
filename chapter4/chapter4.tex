@@ -32,7 +32,7 @@
 \subsection{Preventing command injection}
 \begin{itemize}
 \item Injection vulnerabilities follow from a lack of context at execution time
-\item A first line of defence is strict \texbf{input validation}. It is easy to make the checks too restrictive, which breaks the application. But if the check is too permissive, the vulnerability remains.
+\item A first line of defence is strict \textbf{input validation}. It is easy to make the checks too restrictive, which breaks the application. But if the check is too permissive, the vulnerability remains.
 \item Most programming languages offer functions to \textbf{escape dangerous shell characters}. This way the dangerous characters are encoded, and the shell is no longer confused between data and code.
 \item Some languages offer a safe API to make system calls. Such an API accepts the command and its arguments as separate parameters. Separating the command and the data ensures that there can be no confusion between data and code.
 \item Java offers protection against command injection attacks out of the box. But improper use of the \texttt{exec} method in Java, and its counterpart in .NET, can still cause injection vulnerabilities.
@@ -43,7 +43,7 @@
 \item A \textbf{SQL injection attack} allows the attacker to modify the SQL code that is executed by the database server.
 \item SQL injection is one of the most dangerous problems in web applications. Both the consequences and prevalence of SQL injection vulnerabilities contribute to this status.
 \item Injection vulnerabilities rank first in the OWASP top 10.
-\item A common way to attack a select query is by injecting a \texbf{UNION statement}. The UNION statement tells the database server to execute both queries and combine the data into one dataset. This type of attack is well-suited to steal data from the database.
+\item A common way to attack a select query is by injecting a \textbf{UNION statement}. The UNION statement tells the database server to execute both queries and combine the data into one dataset. This type of attack is well-suited to steal data from the database.
 \item Another versatile attack is the insertion of a \textbf{boolean clause}. For example, many queries filter the results in the WHERE clause. By appending a boolean clause that is always true, the attacker can disable filtering. Consequences are the leaking of information, but also bypassing authorization checks.
 \item Another way to modify the structure of the query is by injecting the comment symbol. When the database server encounters a comment symbol, everything after that is ignored. If the attacker injects the comment symbol, he can eliminate the trailing part of a query. The consequences can be severe since additional constraints are often put at the end of a query.
 \item Tools like \textbf{sqlmap} collect a variety of potential attacks. They even support scanning applications for potential SQL vulnerabilities. These results from sqlmap paint a more complete picture on the complexity of SQL injection attacks.
@@ -52,7 +52,7 @@
 \subsection{Preventing SQL injection}
 \begin{itemize}
 \item SQL injection vulnerabilities have a similar cause as command injection vulnerabilities.
-\item A solid first line of defense is \textb{finput validation}.
+\item A solid first line of defense is \textbf{input validation}.
 \item Remember that input validation alone is not enough.
 \item Use \textbf{prepared statements with variable binding} $\rightarrow$ provide the proper context information.
 \item Unfortunately, variable binding does not work in all parts of a SQL statement. The names of tables and columns need to be specified up front, and cannot be bound later. But there are safe ways to handle untrusted data in these locations.
@@ -62,5 +62,71 @@
 \end{itemize}
 
 \section{Client-side injection attacks}
+\subsection{Traditional XSS attacks}
+\begin{itemize}
+\item An \textbf{Cross-site Scripting (XSS) vulnerability} allows an attacker to get a foothold in the application's browsing context (e.g. popping up an alert dialogue, defacement of a page, theft of sensitive information, session hijacking...).
+\item \textbf{Browser Exploitation Framework (BeEF)}:  Offers a command-and-control interface. Once the attacker has hooked a browser, he can execute all kinds of commands with the click of a button.
+\item \textbf{Reflected cross-site scripting}: A payload is sent to the server as part of the request data. The server incorporates the payload into the HTML page of the response. When the browser processes the page, it sees the payload data and mistakes it for code. This mistake results in the execution of malicious code (=\textbf{script injection attack}).
+\item \textbf{Stored cross-site scripting}: The attacker injects the payload into the application's database. Whenever a user visits a page that displays this data, the payload will be embedded in the page. When the user's browser renders this page, it also executes the attacker's code. Note that this attack does not involve a cross-site request, and is executed entirely within the targeted application.
+\item Each of these attacks has a different approach, but the result is the same. Both enable the execution of the attacker's code in the victim's browser, inside the application's context. These attacks succeed because the browser lacks the context to distinguish between data and code.
+\end{itemize}
 
+\subsection{Common defenses against XSS attacks}
+\begin{itemize}
+\item An easy way to mitigate this vulnerability is to apply input validation. Unfortunately, it only works well in the simplest cases.
+\item The \textbf{XSS Filter Evasion Cheat Sheet} lists a large number of XSS filter bypasses.
+\item A better solution is \textbf{output encoding}: dangerous characters are encoded to their harmless counterparts. Many frameworks and languages offer functions that encode dangerous characters for an HTML context.
+\item The set of dangerous characters is different for each context. Dangerous characters in an HTML element context differ from those in a CSS or JavaScript context. That is why the proper mitigation technique is known as \textbf{context-sensitive output encoding}. Dangerous characters are still encoded, but the difference is that the context now determines which characters are dangerous $\rightarrow$ best mitigation strategy against XSS vulnerabilities.
+\item Libraries offer encoding functions for all kinds of contexts in an HTML page (e.g. \textbf{OWASP Java Encoder library}).
+\item \emph{What if the user-provided input is rich-text data, for example from an HTML editor?}\\
+Applying context-sensitive output encoding in this scenario breaks legitimate functionality. That is why the answer to this problem is \textbf{sanitization}: a sanitization library parses the input and analyses its contents.
+It removes potentially dangerous parts but keeps the rest intact. Do not try to write your own sanitization library. Use a well-vetted library, such as the \textbf{OWASP Java HTML Sanitizer}.
+\end{itemize}
+
+\subsection{DOM-based XSS attacks}
+\begin{itemize}
+\item JavaScript running in the browser can also modify the contents of a page. This JavaScript code can also use untrusted data, and insert it into the page in an insecure way, so this JavaScript code will also need to provide the proper context information to the browser. Such client-side XSS attacks are known as \textbf{DOM-based XSS}.
+\item A DOM-based cross-site scripting attack occurs when legitimate code modifies the DOM in an insecure way.
+\item The same separation exists between \textbf{reflected DOM-based XSS attacks} and \textbf{stored DOM-based XSS attacks}.
+\item Server-side defenses are useless against DOM-based XSS attacks. The best way to prevent DOM-based cross-site scripting vulnerabilities is to use the proper \textbf{DOM APIs}. These APIs offer safe functions to create and insert elements and a way to put data inside an element, without the risk of causing a confusion between data and code.
+\item Of course, using the proper DOM APIs is not always possible. In those cases, you can fall back on traditional XSS defenses.
+\item Untrusted data can be encoded for the right context before inserting it into the page. Various \textbf{client-side encoding libraries} support encoding of data for different contexts.
+\item Alternatively, \textbf{client-side sanitization libraries} transform untrusted HTML code into safe code (e.g. \textbf{DOMPurify}).
+\item A recent study of the Alexa top 5000 websites has shown that at least 9.6 percent are vulnerable to DOM-based cross-site scripting $\rightarrow$ they are prevalent and dangerous.
+\end{itemize}
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

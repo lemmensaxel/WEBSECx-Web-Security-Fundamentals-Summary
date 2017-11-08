@@ -34,10 +34,10 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
 
 
 * Securely handling untrusted data
-  - [x]  Introduction
+  - [x] Introduction
   - [x] Server-side injection attacks
-  - [ ] &rarr; **Client-side injection attacks** &larr;
-  - [ ] Advanced client-side attacks and defenses
+  - [x] Client-side injection attacks
+  - [ ] &rarr; **Advanced client-side attacks and defenses** &larr;
   - [ ] Putting things into context
 * Conclusion
   - [ ] Overview of this course
