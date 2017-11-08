@@ -94,6 +94,55 @@ It removes potentially dangerous parts but keeps the rest intact. Do not try to 
 \item Alternatively, \textbf{client-side sanitization libraries} transform untrusted HTML code into safe code (e.g. \textbf{DOMPurify}).
 \item A recent study of the Alexa top 5000 websites has shown that at least 9.6 percent are vulnerable to DOM-based cross-site scripting $\rightarrow$ they are prevalent and dangerous.
 \end{itemize}
+
+\section{Advanced client-side attacks and defenses}
+\subsection{Alternative injection attack vectors}
+\begin{itemize}
+\item alternative injection attacks use various types of content. Two typical examples are the injection of HTML code and CSS code. A bit more exotic is the injection of SVG code or vulnerable Flash files.
+\item \textbf{HTML injection attack}: the attacker-provided data contains a piece of HTML code, which will end up in the generated page.
+\item The injection of plain HTML elements can also have severe consequences (e.g. exfiltration of data,injecting hidden input fields...).
+\item Ensuring that the browser does not confuse HTML in data fields as code by applying context-sensitive output encoding.
+\item An alternative defense strategy is the use of sanitization. However, the effectiveness of sanitization against HTML injection attacks depends on the sanitizer. Some of these payloads use harmless HTML elements. As a result, a sanitizer may not see them as malicious or dangerous.
+\item \textbf{CSS injection attack}: injection of seemingly harmless CSS code as part of a style element. Even the injection of plain CSS code can cause a lot of harm (e.g. defacement, execution of JavaScript code, right from within the CSS context...).
+\item The proper defence is context-sensitive output encoding. For sanitization, it again depends on the specific sanitizer.
+\end{itemize}
+
+\subsection{HTML5 Sandboxing}
+\begin{itemize}
+\item A first step to reduce the impact of injection attacks is to enforce context isolation. The Same-Origin Policy can be used to isolate the main application context from potential untrusted parts.
+\item \textbf{Origin-based isolation} is effective, but also tricky to implement. It requires splitting of the application into different components so that they can be deployed in different origins.
+\item The \textbf{HTML5 sandbox attribute} allows you to impose additional constraints on an iframe. In essence, a sandboxed iframe offers a restricted environment, which can be used to isolate untrusted content.
+\item You can customize the sandbox to your specific needs. Most of the restrictions can be turned off by adding a specific directives to the value of the attribute.
+\item The real power of the sandbox attribute is the capability to isolate content in a unique origin. This feature gives you the benefits of origin-based isolation, without the hassle of using different origins. When you load a page from your origin in a sandboxed iframe, the browser substitutes the actual origin with a random and unique value. In practice, this means that this content will be isolated from every other context in the browser, regardless of where it was loaded from.
+\item Combining the \textbf{allow-sameorigin} and \textbf{allow-scripts} permission enables a bypass-attack on the sandbox.So use one or the other, but never both together.
+\end{itemize}
+
+\subsection{Content Security Policy}
+\begin{itemize}
+\item Origin-based isolation and sandboxing can be used to isolate specific blocks of content. But it is a challenge to deploy these techniques as an application-wide second line of defense.
+\item \textbf{Content Security Policy (CSP)}: a complex security policy with various options. It defines the intended behaviour of a page and prevents actions that violate these intentions. 
+\item CSP offers control over various kinds of content, such as scripts, styles, and images.
+\item For each of these resources, you can specify where they can originate from. Whenever the page requests resources that are not listed in the CSP policy, the browser refuses to load them.
+\item Script content is highly interactive, which is why the script-src directive is quite complicated. Similar in complexity is the style-src directive, which controls stylesheets. Stylesheets are also considered to be interactive and are subject to the same restrictions as script content. By default, CSP prevents inline styles from being executed.
+\item The default directive is used when a more specific directive is absent. If we remove the \textbf{img-src} directive from our policy but retain the \textbf{default-src} directive  and the page tries to load a remote image, the browser will use the default-src directive, since there is no img-src directive.
+\item Whenever the browser detects a violation of a CSP policy, it shows an error message in the developer console. But of course, when a violation happens in the user's browser, these messages are not very useful. That is why CSP offers a reporting feature. To enable the reporting feature, you need to add the \textbf{report-uri} directive to the policy.
+\item CSP also supports a \textbf{report-only} mode. In report-only mode, violations do not result in the blocking of the resource.
+\end{itemize}
+
+\begin{itemize}
+\item Unfortunately, many applications depend on inline style and script code. They break when CSP is deployed, because of this limitation. That is why CSP supports an \textbf{unsafe-inline} keyword. Adding that keyword to the script-src, style-src or default-src directive re-enables inline style or code.
+\item Of course, when inline code or style is enabled, CSP will not be able to protect your application against injection attacks. That is why you should never use unsafe-inline for scripts.
+\item Hashes and nonces replace the use of unsafe-inline. As a result, if a policy uses both unsafe-inline and hashes/nonces, the browser will only use one of them. A modern browser will use the hashes and nonces, and ignore unsafe-inline. An older browser does not know about hashes and nonces, so it will ignore them, and use unsafe-inline. In essence, this mechanism supports backwards compatilibity with older browsers, while offering better security features to newer browsers.
+\item \textbf{Hashes} are calculated on the contents of a script block, and uniquely identify a piece of code. By whitelisting a code block with a specific hash, you can re-enable inline scripts. Below is an example of a CSP policy with a hash.
+\item Note that the use of hashes in a CSP policy is secure because the hash is directly correlated to the contents of the script block. Even if the attacker can inject script code, he can only inject code that is already white listed.
+\item Hashes are well-suited to whitelist static code blocks in a page. But if part of the code block is dynamically generated, hashes become almost impossible to use. That is why CSP level 2 also supports a second mechanism: nonces.
+\item A \textbf{nonce} is a random and unique value. Both the script block (using the \texttt{nonce=""} attribute) and the policy contain the nonce. If they match, the browser allows the script block to execute. The essence of using nonces is that attacker-injected code does not contain the nonce. Hence, it will not be executed.
+\item But for nonces to be secure, they need to be unpredictable. An attacker cannot learn the nonce or predict the next value. Therefore, every response from the server should contain a different nonce. To avoid predictability, nonces should be derived from a secure random number generator. If these two conditions are met, then the attacker will never succeed in injecting a script block with a valid nonce.
+\item Building a CSP policy requires you to whitelist a lot of resources. Once you have external dependencies, your whitelist starts growing rapidly. As a result, it is common to start whitelisting entire hosts.
+\item Unfortunately, research from Google has shown that host-based whitelists can result in bypass attacks.
+\item The first solution is to whitelist up to the file level. If you only whitelist explicit script files on a CDN, there’s no way to include potentially dangerous scripts. There is, however, one caveat to this approach. In many scenarios, whitelisting explicit files is next to impossible to get right, and to maintain over time.
+\item An alternative solution is to use the \textbf{strict-dynamic} in combination with hashes and nonces. strict-dynamic was introduced in 2016 and is part of the upcoming level 3 specification of CSP. The strict-dynamic keyword tells the browser that already-trusted scripts are allowed to load their own resources.
+\end{itemize}
 \end{document}
 
 

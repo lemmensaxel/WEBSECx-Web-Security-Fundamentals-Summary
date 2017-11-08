@@ -37,10 +37,10 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
   - [x] Introduction
   - [x] Server-side injection attacks
   - [x] Client-side injection attacks
-  - [ ] &rarr; **Advanced client-side attacks and defenses** &larr;
-  - [ ] Putting things into context
+  - [x] Advanced client-side attacks and defenses
+  - [x] Putting things into context
 * Conclusion
-  - [ ] Overview of this course
+  - [ ] &rarr; **Overview of this course** &larr;
   - [ ] Overview of best practices
   - [ ] Final exam
   - [ ] Towards secure web applications
