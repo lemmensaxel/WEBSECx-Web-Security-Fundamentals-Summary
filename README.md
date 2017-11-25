@@ -40,7 +40,7 @@ You can generate a PDF document by running *pdflatex* on *main.tex*.
   - [x] Advanced client-side attacks and defenses
   - [x] Putting things into context
 * Conclusion
-  - [ ] &rarr; **Overview of this course** &larr;
-  - [ ] Overview of best practices
-  - [ ] Final exam
-  - [ ] Towards secure web applications
+  - [x] Overview of this course
+  - [x] Overview of best practices
+  - [x] Final exam
+  - [x] Towards secure web applications

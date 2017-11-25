@@ -1,0 +1,81 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\chapter{Conclusion}
+
+\section{Overview of best practices}
+\subsection{Communication security}
+\begin{itemize}
+\item Deploy every application entirely over HTTPS.
+\item Configure TLS to support only new protocols, and prefer ciphers that ensure Perfect Forward Secrecy.
+\item Enable HTTP Strict Transport Security (HSTS) with a long max-age. 
+\item Setup Certificate Transparency (CT) log monitoring and investigate how your CA will support CT.
+\item Configure Certificate Authority Authorization (CAA) records to limit the CAs that can hand out certificates for your domain.
+\end{itemize}
+
+\subsection{Authentication and authorization}
+\begin{itemize}
+\item Use a dedicated password hashing mechanism to store passwords in a secure way.
+\item Ensure your application does not leak information about existing accounts.
+\item Offer two-factor authentication, but stay clear of SMS-based verification codes.
+\item Add the Secure cookie flag to all cookies, and the HttpOnly flag where relevant.
+\item Implement proper CSRF defenses.
+\item Check every entry point of your application to see if it contains appropriate authorization checks.
+\end{itemize}
+
+\subsection{Untrusted data on the server}
+\begin{itemize}
+\item Execute system commands by using an API that separates the command and its arguments.
+\item Never encode user input directly into a SQL query.
+\begin{itemize}
+\item Use parameterized statements with variable binding where possible.
+\item Use whitelisting when variable binding is not possible.
+\item Only use encoding as the last resort.
+\end{itemize}
+\end{itemize}
+
+\subsection{Untrusted data on the client}
+\begin{itemize}
+\item Apply context-sensitive output encoding to all simple outputs in a page.
+\item Use sanitization for output that requires the use of particular code constructs.
+\item If you modify pages within the browser, apply the same set of defenses to mitigate DOM-based XSS attacks.
+\item Leverage the isolation offered by the Same-Origin Policy to compartmentalize your application.
+\item Enforce additional restrictions on untrusted content using the sandbox attribute.
+\item Deploy Content Security Policy as a second line of defense. Note that CSP is quite complex, so focus on the other defenses first.
+\end{itemize}
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
